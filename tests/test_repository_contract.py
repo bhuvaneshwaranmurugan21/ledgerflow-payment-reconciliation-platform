@@ -3,6 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from ledgerflow.contracts import canonical_json, sha256_text
+from ledgerflow.evidence import _implementation_sha256
+
 
 def test_step_function_definition_is_valid_json_and_has_one_publish_gate() -> None:
     root = Path(__file__).resolve().parents[1]
@@ -75,3 +78,13 @@ def test_canonical_diagram_has_expected_dimensions_and_no_duplicate_copy() -> No
     height = int.from_bytes(png[20:24], "big")
     assert (width, height) == (2048, 813)
     assert len(list((root / "architecture").glob("*.png"))) == 1
+
+
+def test_retained_evidence_is_bound_to_the_current_executable_core() -> None:
+    root = Path(__file__).resolve().parents[1]
+    summary = json.loads((root / "evidence/verified-local/summary.json").read_text())
+    assert summary["implementation_sha256"] == _implementation_sha256(root)
+
+    retained_sha256 = summary["evidence_sha256"]
+    summary["evidence_sha256"] = ""
+    assert retained_sha256 == sha256_text(canonical_json(summary))

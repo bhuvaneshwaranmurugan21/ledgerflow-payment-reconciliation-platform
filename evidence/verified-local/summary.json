@@ -1,6 +1,6 @@
 {
   "classification": "MEASURED_LOCAL_RESULT",
-  "evidence_sha256": "66290203fcc9d2c94e6d3104f7cfacbaa946bc0f2c2ff2aebadc9d3aea5ce08f",
+  "evidence_sha256": "994e71c146f37f9d9a57c12d10ae76e93fd3ed90108293e401668af6eb504284",
   "failure_lab": {
     "failed": 0,
     "passed": 15,
@@ -83,7 +83,7 @@
       }
     ]
   },
-  "generated_at": "2026-08-10T11:49:59.512927+00:00",
+  "generated_at": "2026-08-10T14:14:45.473678+00:00",
   "generation": {
     "classification": "SYNTHETIC_FIXTURE",
     "injected": {
@@ -98,7 +98,7 @@
     "transactions": 21605,
     "valid_unique_events": 50000
   },
-  "implementation_sha256": "3789485e23efd8e1f505cd308af13e1738c0c9890b7f761708e425293f77f764",
+  "implementation_sha256": "b78ac69ea5df6464ec1a11203cf76c3ba7a49bd32a40e375ad0d7e94bd8bacfe",
   "limitations": [
     "Synthetic local evidence is not an AWS throughput or availability measurement.",
     "Cloud deployment status remains unverified until a retained deployment report exists.",
@@ -128,7 +128,7 @@
     "business_exception": 0,
     "classification": "MEASURED_LOCAL_RESULT",
     "duplicates": 83,
-    "elapsed_seconds": 3.110903,
+    "elapsed_seconds": 2.974019,
     "ledger_balance_minor": 0,
     "ledger_balanced": true,
     "ledger_entry": 56790,
@@ -148,9 +148,9 @@
     "quarantined": 4,
     "raw_reconciled": true,
     "raw_records": 50087,
-    "records_per_second": 16100.47,
+    "records_per_second": 16841.52,
     "replay_ledger_delta": 0,
-    "replay_seconds": 2.159909,
+    "replay_seconds": 2.472425,
     "replay_state_unchanged": true,
     "run_id": "initial-load",
     "settlement_groups": 36,

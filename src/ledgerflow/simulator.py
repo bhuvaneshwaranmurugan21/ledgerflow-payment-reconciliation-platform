@@ -53,7 +53,8 @@ def generate_payment_events(
     sources = [source for source in registry.values() if source.mode in {"stream", "cdc"}]
     if not sources:
         raise ValueError("registry has no lifecycle sources")
-    rng = random.Random(seed)
+    # Determinism is required for reproducible synthetic evidence; this PRNG never protects data.
+    rng = random.Random(seed)  # nosec B311
     base = datetime(2026, 1, 1, tzinfo=UTC)
     valid: list[dict[str, Any]] = []
     transaction_number = 1

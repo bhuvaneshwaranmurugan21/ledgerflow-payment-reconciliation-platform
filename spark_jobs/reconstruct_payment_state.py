@@ -8,7 +8,7 @@ import re
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql import functions as F
 
-TABLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
+TABLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*){0,2}$")
 
 
 def _table(value: str) -> str:
@@ -204,22 +204,22 @@ def main() -> None:
     current, exceptions = reconstruct(affected_history)
     current.createOrReplaceTempView("incoming_payment_state")
     exceptions.createOrReplaceTempView("incoming_business_exception")
-    spark.sql(
-        f"""
-        MERGE INTO {state_table} target
-        USING incoming_payment_state source ON target.transaction_id = source.transaction_id
-        WHEN MATCHED THEN UPDATE SET *
-        WHEN NOT MATCHED THEN INSERT *
-        """
+    # Spark SQL cannot bind table identifiers; _table applies a strict segment allowlist.
+    state_merge_sql = (
+        f"MERGE INTO {state_table} target\n"  # nosec B608
+        "USING incoming_payment_state source "
+        "ON target.transaction_id = source.transaction_id\n"
+        "WHEN MATCHED THEN UPDATE SET *\n"
+        "WHEN NOT MATCHED THEN INSERT *"
     )
-    spark.sql(
-        f"""
-        MERGE INTO {exception_table} target
-        USING incoming_business_exception source ON target.event_id = source.event_id
-        WHEN MATCHED THEN UPDATE SET *
-        WHEN NOT MATCHED THEN INSERT *
-        """
+    exception_merge_sql = (
+        f"MERGE INTO {exception_table} target\n"  # nosec B608
+        "USING incoming_business_exception source ON target.event_id = source.event_id\n"
+        "WHEN MATCHED THEN UPDATE SET *\n"
+        "WHEN NOT MATCHED THEN INSERT *"
     )
+    spark.sql(state_merge_sql)
+    spark.sql(exception_merge_sql)
     spark.stop()
 
 

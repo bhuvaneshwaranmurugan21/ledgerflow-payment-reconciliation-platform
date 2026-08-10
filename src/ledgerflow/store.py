@@ -125,6 +125,15 @@ CREATE TABLE IF NOT EXISTS settlement_exception(
 );
 """
 
+TABLE_COUNT_QUERIES = {
+    "accepted_event": "SELECT COUNT(*) FROM accepted_event",
+    "quarantine": "SELECT COUNT(*) FROM quarantine",
+    "business_exception": "SELECT COUNT(*) FROM business_exception",
+    "posted_event": "SELECT COUNT(*) FROM posted_event",
+    "ledger_entry": "SELECT COUNT(*) FROM ledger_entry",
+    "payment_state": "SELECT COUNT(*) FROM payment_state",
+}
+
 
 def _event_from_row(row: sqlite3.Row) -> PaymentEvent:
     return PaymentEvent(
@@ -497,15 +506,8 @@ class LedgerStore:
                 )
             }
             counts = {
-                name: connection.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
-                for name in (
-                    "accepted_event",
-                    "quarantine",
-                    "business_exception",
-                    "posted_event",
-                    "ledger_entry",
-                    "payment_state",
-                )
+                name: connection.execute(query).fetchone()[0]
+                for name, query in TABLE_COUNT_QUERIES.items()
             }
             unbalanced = connection.execute(
                 """
@@ -545,18 +547,11 @@ class LedgerStore:
         }
 
     def table_count(self, table: str) -> int:
-        allowed = {
-            "accepted_event",
-            "quarantine",
-            "business_exception",
-            "posted_event",
-            "ledger_entry",
-            "payment_state",
-        }
-        if table not in allowed:
+        query = TABLE_COUNT_QUERIES.get(table)
+        if query is None:
             raise ValueError(f"unsupported table: {table}")
         with closing(self.connect()) as connection:
-            return int(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+            return int(connection.execute(query).fetchone()[0])
 
     def clear_email_leak_count(self) -> int:
         with closing(self.connect()) as connection:

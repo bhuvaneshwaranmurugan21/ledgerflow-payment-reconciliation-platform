@@ -8,7 +8,7 @@ import re
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-TABLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
+TABLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*){0,2}$")
 
 
 def _table(value: str) -> str:
@@ -57,21 +57,20 @@ def main() -> None:
         )
     )
     actual.createOrReplaceTempView("incoming_settlement_evidence")
-    spark.sql(
-        f"""
-        MERGE INTO {evidence_table} target
-        USING incoming_settlement_evidence source
-          ON target.business_date = source.business_date
-         AND target.processor_id = source.processor_id
-         AND target.currency = source.currency
-        WHEN MATCHED THEN UPDATE SET
-          target.amount_minor = source.actual_minor
-        WHEN NOT MATCHED THEN INSERT
-          (business_date, processor_id, currency, amount_minor)
-        VALUES
-          (source.business_date, source.processor_id, source.currency, source.actual_minor)
-        """
+    # Spark SQL cannot bind table identifiers; _table applies a strict segment allowlist.
+    evidence_merge_sql = (
+        f"MERGE INTO {evidence_table} target\n"  # nosec B608
+        "USING incoming_settlement_evidence source\n"
+        "  ON target.business_date = source.business_date\n"
+        " AND target.processor_id = source.processor_id\n"
+        " AND target.currency = source.currency\n"
+        "WHEN MATCHED THEN UPDATE SET target.amount_minor = source.actual_minor\n"
+        "WHEN NOT MATCHED THEN INSERT "
+        "(business_date, processor_id, currency, amount_minor)\n"
+        "VALUES (source.business_date, source.processor_id, source.currency, "
+        "source.actual_minor)"
     )
+    spark.sql(evidence_merge_sql)
     exceptions = (
         expected.join(actual, ["business_date", "processor_id", "currency"], "full")
         .fillna(0, subset=["expected_minor", "actual_minor"])

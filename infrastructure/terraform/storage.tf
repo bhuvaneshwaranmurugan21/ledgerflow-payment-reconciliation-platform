@@ -54,6 +54,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "noncurrent" {
   rule {
     id     = "noncurrent-retention"
     status = "Enabled"
+    filter {
+      prefix = ""
+    }
     noncurrent_version_expiration {
       noncurrent_days = var.environment == "prod" ? 365 : 30
     }

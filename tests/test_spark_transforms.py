@@ -6,8 +6,57 @@ pyspark = pytest.importorskip("pyspark")
 
 from pyspark.sql import SparkSession  # noqa: E402
 
+from spark_jobs.bootstrap_tables import _database  # noqa: E402
+from spark_jobs.ingest_accepted_events import _table as ingest_table  # noqa: E402
+from spark_jobs.maintain_iceberg import _table as maintenance_table  # noqa: E402
+from spark_jobs.post_ledger import _table as ledger_table  # noqa: E402
 from spark_jobs.post_ledger import posting_lines  # noqa: E402
+from spark_jobs.reconcile_settlements import _table as settlement_table  # noqa: E402
+from spark_jobs.reconstruct_payment_state import _table as state_table  # noqa: E402
 from spark_jobs.reconstruct_payment_state import reconstruct  # noqa: E402
+
+TABLE_VALIDATORS = (
+    ingest_table,
+    maintenance_table,
+    ledger_table,
+    settlement_table,
+    state_table,
+)
+
+
+@pytest.mark.parametrize("validator", TABLE_VALIDATORS)
+@pytest.mark.parametrize(
+    "identifier",
+    ("ledger_entry", "finance.ledger_entry", "glue_catalog.finance.ledger_entry"),
+)
+def test_table_identifier_allowlist_accepts_qualified_names(validator, identifier: str) -> None:
+    assert validator(identifier) == identifier
+
+
+@pytest.mark.parametrize("validator", TABLE_VALIDATORS)
+@pytest.mark.parametrize(
+    "identifier",
+    (
+        "",
+        ".ledger_entry",
+        "finance..ledger_entry",
+        "finance.ledger_entry.",
+        "catalog.finance.ledger.entry",
+        "finance.ledger-entry",
+        "finance.ledger entry",
+        "finance.ledger_entry;DROP_TABLE",
+        "finance.`ledger_entry`",
+    ),
+)
+def test_table_identifier_allowlist_rejects_sql_syntax(validator, identifier: str) -> None:
+    with pytest.raises(ValueError, match="unsafe table identifier"):
+        validator(identifier)
+
+
+@pytest.mark.parametrize("identifier", ("", "9finance", "finance-prod", "finance;DROP"))
+def test_database_identifier_allowlist_rejects_sql_syntax(identifier: str) -> None:
+    with pytest.raises(ValueError, match="unsafe database identifier"):
+        _database(identifier)
 
 
 @pytest.fixture(scope="module")

@@ -8,7 +8,7 @@ import re
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
 
-TABLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
+TABLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*){0,2}$")
 
 
 def _table(value: str) -> str:
@@ -91,20 +91,19 @@ def main() -> None:
     lines = posting_lines(monetary_events)
     monetary_events.createOrReplaceTempView("incoming_posted_events")
     lines.createOrReplaceTempView("incoming_ledger_lines")
-    spark.sql(
-        f"""
+    # Spark SQL cannot bind table identifiers; _table applies a strict segment allowlist.
+    posted_merge_sql = f"""
         MERGE INTO {posted_event_table} target
         USING incoming_posted_events source ON target.event_id = source.event_id
         WHEN NOT MATCHED THEN INSERT *
         """
-    )
-    spark.sql(
-        f"""
+    ledger_merge_sql = f"""
         MERGE INTO {ledger_table} target
         USING incoming_ledger_lines source ON target.entry_id = source.entry_id
         WHEN NOT MATCHED THEN INSERT *
         """
-    )
+    spark.sql(posted_merge_sql)
+    spark.sql(ledger_merge_sql)
     spark.stop()
 
 

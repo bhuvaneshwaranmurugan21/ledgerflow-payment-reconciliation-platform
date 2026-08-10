@@ -175,3 +175,9 @@ def test_missing_transaction_version_blocks_entire_transaction(
     assert result["business_exception"] == 2
     assert result["payment_state"] == 0
     assert result["ledger_entry"] == 0
+
+
+def test_table_count_rejects_non_allowlisted_sql_identifier(tmp_path: Path) -> None:
+    store = LedgerStore(tmp_path / "identifier-gate.sqlite")
+    with pytest.raises(ValueError, match="unsupported table"):
+        store.table_count("accepted_event; DROP TABLE ledger_entry")

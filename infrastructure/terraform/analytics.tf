@@ -61,8 +61,8 @@ resource "aws_redshiftserverless_usage_limit" "monthly" {
   count = var.enable_redshift ? 1 : 0
 
   resource_arn  = aws_redshiftserverless_workgroup.finance[0].arn
-  usage_type    = "RPU_TIME"
+  usage_type    = "serverless-compute"
   amount        = 2000
-  period        = "MONTHLY"
+  period        = "monthly"
   breach_action = "log"
 }
