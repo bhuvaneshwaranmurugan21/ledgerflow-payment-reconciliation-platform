@@ -1,0 +1,12 @@
+ledgerflow_finance:
+  target: ci
+  outputs:
+    ci:
+      type: redshift
+      host: localhost
+      port: 5439
+      user: ci_user
+      password: "{{ env_var('LEDGERFLOW_CI_PASSWORD', '') }}"
+      dbname: analytics
+      schema: dbt_ci
+      threads: 2

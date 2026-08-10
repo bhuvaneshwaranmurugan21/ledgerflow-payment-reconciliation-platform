@@ -1,0 +1,28 @@
+name: Spark
+
+on:
+  push:
+    paths: ["spark_jobs/**", "tests/test_spark_transforms.py", ".github/workflows/spark.yml"]
+  pull_request:
+    paths: ["spark_jobs/**", "tests/test_spark_transforms.py", ".github/workflows/spark.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  transforms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: python -m pip install -e ".[dev,spark]"
+      - run: python -m pytest tests/test_spark_transforms.py --no-cov
+        env:
+          SPARK_LOCAL_IP: 127.0.0.1

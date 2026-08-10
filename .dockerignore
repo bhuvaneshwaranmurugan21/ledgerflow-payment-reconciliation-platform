@@ -1,0 +1,9 @@
+.git
+.github
+.venv
+.terraform
+evidence
+artifacts
+tests
+__pycache__
+*.pyc

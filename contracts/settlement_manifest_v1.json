@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerflow.example/contracts/settlement-manifest/1",
+  "title": "LedgerFlow consolidated settlement manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "revision",
+    "file_name",
+    "byte_size",
+    "record_count",
+    "sha256",
+    "raw_control_totals_minor"
+  ],
+  "properties": {
+    "version": {"const": 1},
+    "revision": {"type": "integer", "minimum": 1},
+    "file_name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+\\.jsonl$"},
+    "byte_size": {"type": "integer", "minimum": 1, "maximum": 5000000000},
+    "record_count": {"type": "integer", "minimum": 1},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "raw_control_totals_minor": {
+      "type": "object",
+      "additionalProperties": {"type": "integer"}
+    }
+  }
+}

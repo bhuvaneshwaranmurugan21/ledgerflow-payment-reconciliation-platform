@@ -1,0 +1,15 @@
+ledgerflow_finance:
+  target: prod
+  outputs:
+    prod:
+      type: redshift
+      host: "{{ env_var('LEDGERFLOW_REDSHIFT_HOST') }}"
+      port: 5439
+      user: "{{ env_var('LEDGERFLOW_REDSHIFT_USER') }}"
+      password: "{{ env_var('LEDGERFLOW_REDSHIFT_PASSWORD') }}"
+      dbname: finance
+      schema: ledgerflow
+      threads: 8
+      sslmode: verify-full
+      connect_timeout: 10
+      retries: 2

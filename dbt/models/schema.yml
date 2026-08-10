@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_accepted_payment_event
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+      - name: transaction_id
+        data_tests: [not_null]
+      - name: amount_minor
+        data_tests: [not_null]
+  - name: stg_ledger_entry
+    columns:
+      - name: entry_id
+        data_tests: [not_null, unique]
+      - name: event_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accepted_payment_event')
+                field: event_id
+  - name: dim_payment_current
+    columns:
+      - name: transaction_id
+        data_tests: [not_null, unique]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['AUTHORIZED','PARTIALLY_CAPTURED','CAPTURED','PARTIALLY_REFUNDED','REFUNDED','PARTIALLY_CHARGEDBACK','CHARGEDBACK']
+  - name: stg_business_exception
+    columns:
+      - name: transaction_id
+        data_tests: [not_null]
+  - name: fct_settlement_exception
+    columns:
+      - name: delta_minor
+        data_tests: [not_null]

@@ -1,0 +1,22 @@
+name: Infrastructure
+
+on:
+  push:
+    paths: ["infrastructure/**", "orchestration/**", "spark_jobs/**", ".github/workflows/infrastructure.yml"]
+  pull_request:
+    paths: ["infrastructure/**", "orchestration/**", "spark_jobs/**", ".github/workflows/infrastructure.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+      - run: terraform fmt -check -recursive infrastructure/terraform
+      - run: terraform -chdir=infrastructure/terraform init -backend=false
+      - run: terraform -chdir=infrastructure/terraform validate

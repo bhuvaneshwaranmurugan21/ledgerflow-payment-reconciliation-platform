@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "diagram": "architecture/ledgerflow-payments-architecture.png",
+  "components": [
+    {"id": "payment_gateways", "label": "Payment gateways", "boundary": "external", "artifacts": ["contracts/payment_event_v1.json"]},
+    {"id": "payment_databases", "label": "Payment databases", "boundary": "external", "artifacts": ["docs/architecture.md"]},
+    {"id": "bank_fx_apis", "label": "Bank / FX APIs", "boundary": "external", "artifacts": ["docs/architecture.md"]},
+    {"id": "settlement_files", "label": "Settlement files", "boundary": "external", "artifacts": ["src/ledgerflow/manifest.py", "contracts/settlement_evidence_v1.json"]},
+    {"id": "lifecycle_topics", "label": "Lifecycle topics", "boundary": "internal", "artifacts": ["infrastructure/terraform/streams.tf"]},
+    {"id": "cdc_capture", "label": "CDC capture", "boundary": "internal", "artifacts": ["infrastructure/terraform/cdc.tf"]},
+    {"id": "manifest_loader", "label": "Manifest file loader", "boundary": "internal", "artifacts": ["lambdas/manifest_loader/handler.py", "infrastructure/terraform/ingestion.tf"]},
+    {"id": "schema_identity_gate", "label": "Schema + identity gate", "boundary": "internal", "artifacts": ["src/ledgerflow/contracts.py", "lambdas/schema_identity_gate/handler.py"]},
+    {"id": "financial_bronze", "label": "S3 payment-event bronze", "boundary": "internal", "artifacts": ["infrastructure/terraform/storage.tf"]},
+    {"id": "orchestration", "label": "Airflow, EventBridge and Step Functions", "boundary": "internal", "artifacts": ["orchestration/airflow/ledgerflow_finance_dag.py", "orchestration/stepfunctions/settlement_workflow.asl.json", "infrastructure/terraform/orchestration.tf"]},
+    {"id": "security", "label": "IAM, KMS, Secrets and Lake Formation", "boundary": "internal", "artifacts": ["infrastructure/terraform/security.tf"]},
+    {"id": "observability", "label": "CloudWatch, audit and reconciliation SLOs", "boundary": "internal", "artifacts": ["infrastructure/terraform/observability.tf", "docs/operations.md"]},
+    {"id": "payment_state", "label": "Spark payment-state reconstruction", "boundary": "internal", "artifacts": ["spark_jobs/reconstruct_payment_state.py"]},
+    {"id": "ledger_posting", "label": "Glue ledger-posting and settlement jobs", "boundary": "internal", "artifacts": ["spark_jobs/post_ledger.py", "spark_jobs/reconcile_settlements.py", "infrastructure/terraform/processing.tf"]},
+    {"id": "reconciliation_gate", "label": "Double-entry, currency and settlement gate", "boundary": "internal", "artifacts": ["src/ledgerflow/store.py", "tests/test_evidence.py"]},
+    {"id": "iceberg_tables", "label": "Iceberg transaction, ledger and settlement tables", "boundary": "internal", "artifacts": ["infrastructure/sql/create_iceberg_tables.sql"]},
+    {"id": "dbt_models", "label": "dbt finance and risk models", "boundary": "internal", "artifacts": ["dbt/models/marts/fct_ledger_daily.sql", "dbt/models/marts/fct_settlement_exception.sql"]},
+    {"id": "athena_audit", "label": "Athena audit queries", "boundary": "internal", "artifacts": ["infrastructure/sql/athena_audit_queries.sql", "infrastructure/terraform/analytics.tf"]},
+    {"id": "redshift_marts", "label": "Redshift payment marts", "boundary": "internal", "artifacts": ["infrastructure/terraform/analytics.tf", "dbt/dbt_project.yml"]}
+  ]
+}

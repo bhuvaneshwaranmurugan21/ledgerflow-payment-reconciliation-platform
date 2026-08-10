@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ledgerflow-payment-reconciliation-platform"
+version = "1.0.0"
+description = "Idempotent payment-event, double-entry ledger and settlement reconciliation platform"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+ledgerflow = "ledgerflow.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "mypy>=1.15,<2",
+  "pytest>=8,<9",
+  "pytest-cov>=6,<8",
+  "ruff>=0.11,<1",
+]
+spark = ["pyspark>=3.5,<4"]
+aws = ["boto3>=1.35,<2"]
+analytics = ["dbt-core>=1.9,<2", "dbt-redshift>=1.9,<2"]
+orchestration = [
+  "apache-airflow>=2.10,<3",
+  "apache-airflow-providers-amazon>=9,<10",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --cov=ledgerflow --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/ledgerflow/evidence.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/ledgerflow"]

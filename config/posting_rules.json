@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "currency_unit": "minor",
+  "rules": {
+    "authorization": [],
+    "capture": [
+      {"account": "processor_receivable", "multiplier": 1},
+      {"account": "merchant_payable", "multiplier": -1}
+    ],
+    "refund": [
+      {"account": "merchant_payable", "multiplier": 1},
+      {"account": "processor_receivable", "multiplier": -1}
+    ],
+    "chargeback": [
+      {"account": "chargeback_loss", "multiplier": 1},
+      {"account": "processor_receivable", "multiplier": -1}
+    ]
+  }
+}
+

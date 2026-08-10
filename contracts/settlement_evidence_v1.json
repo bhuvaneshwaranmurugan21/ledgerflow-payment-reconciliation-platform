@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerflow.example/contracts/settlement-evidence/1.0",
+  "title": "LedgerFlow settlement evidence 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "business_date", "processor_id", "currency", "amount_minor"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "business_date": {"type": "string", "format": "date"},
+    "processor_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"},
+    "currency": {"enum": ["INR", "USD", "EUR", "GBP"]},
+    "amount_minor": {"type": "integer"}
+  }
+}

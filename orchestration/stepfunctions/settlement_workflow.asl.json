@@ -1,0 +1,154 @@
+{
+  "Comment": "One owner for settlement validation, posting and publication gate",
+  "StartAt": "ValidateSettlementManifest",
+  "States": {
+    "ValidateSettlementManifest": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${manifest_validation_job}",
+        "Arguments": {
+          "--data-path.$": "States.Format('s3://{}/{}', $.verified_bucket, $.verified_data_key)",
+          "--manifest-path.$": "States.Format('s3://{}/{}', $.manifest_bucket, $.manifest_key)",
+          "--business-date.$": "$.business_date"
+        }
+      },
+      "Retry": [{"ErrorEquals": ["States.Timeout"], "MaxAttempts": 2, "IntervalSeconds": 30, "BackoffRate": 2}],
+      "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}],
+      "ResultPath": "$.manifest_validation",
+      "Next": "IngestAcceptedEvents"
+    },
+    "IngestAcceptedEvents": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${accepted_ingestion_job}",
+        "Arguments": {
+          "--source-path.$": "States.Format('s3://${accepted_bucket}/accepted/event_date={}/', $.business_date)",
+          "--target-table": "${accepted_event_table}"
+        }
+      },
+      "Retry": [{"ErrorEquals": ["States.Timeout"], "MaxAttempts": 2, "IntervalSeconds": 30, "BackoffRate": 2}],
+      "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}],
+      "ResultPath": "$.accepted_ingestion",
+      "Next": "RunPaymentStateReconstruction"
+    },
+    "RunPaymentStateReconstruction": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${payment_state_job}",
+        "Arguments": {
+          "--source-table": "${accepted_event_table}",
+          "--state-table": "${payment_state_table}",
+          "--exception-table": "${business_exception_table}",
+          "--business-date.$": "$.business_date"
+        }
+      },
+      "Retry": [{"ErrorEquals": ["Glue.ConcurrentRunsExceededException", "States.Timeout"], "MaxAttempts": 2, "IntervalSeconds": 30, "BackoffRate": 2}],
+      "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}],
+      "ResultPath": "$.payment_state_reconstruction",
+      "Next": "PostLedger"
+    },
+    "PostLedger": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${ledger_job}",
+        "Arguments": {
+          "--source-table": "${accepted_event_table}",
+          "--exception-table": "${business_exception_table}",
+          "--posted-event-table": "${posted_event_table}",
+          "--ledger-table": "${ledger_table}",
+          "--business-date.$": "$.business_date"
+        }
+      },
+      "Retry": [{"ErrorEquals": ["Glue.ConcurrentRunsExceededException", "States.Timeout"], "MaxAttempts": 2, "IntervalSeconds": 30, "BackoffRate": 2}],
+      "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}],
+      "ResultPath": "$.ledger_posting",
+      "Next": "ReconcileSettlement"
+    },
+    "ReconcileSettlement": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+          "JobName": "${reconciliation_job}",
+          "Arguments": {
+            "--posted-event-table": "${posted_event_table}",
+            "--business-exception-table": "${business_exception_table}",
+            "--settlement-path.$": "States.Format('s3://{}/{}', $.verified_bucket, $.verified_data_key)",
+          "--settlement-evidence-table": "${settlement_evidence_table}",
+          "--exception-table": "${settlement_exception_table}",
+          "--business-date.$": "$.business_date"
+        }
+      },
+      "Retry": [{"ErrorEquals": ["States.Timeout"], "MaxAttempts": 2, "IntervalSeconds": 30, "BackoffRate": 2}],
+      "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}],
+      "ResultPath": "$.settlement_reconciliation",
+      "Next": "BuildPublicationEvidence"
+    },
+    "BuildPublicationEvidence": {
+      "Type": "Pass",
+      "Parameters": {
+        "status": "RECONCILED",
+        "business_date.$": "$.business_date",
+        "revision.$": "$.revision",
+        "manifest_sha256.$": "$.sha256",
+        "manifest_record_count.$": "$.record_count",
+        "source_version_id.$": "$.source_version_id",
+        "verified_data_key.$": "$.verified_data_key",
+        "manifest_validation_job_run_id.$": "$.manifest_validation.JobRunId",
+        "state_job_run_id.$": "$.payment_state_reconstruction.JobRunId",
+        "ledger_job_run_id.$": "$.ledger_posting.JobRunId",
+        "reconciliation_job_run_id.$": "$.settlement_reconciliation.JobRunId"
+      },
+      "ResultPath": "$.publication_evidence",
+      "Next": "WritePublicationEvidence"
+    },
+    "WritePublicationEvidence": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+      "Parameters": {
+        "Bucket": "${control_bucket}",
+        "Key.$": "States.Format('gates/business_date={}/revision={}/sha256={}/SETTLEMENT_RECONCILED.json', $.business_date, $.revision, $.sha256)",
+        "Body.$": "States.JsonToString($.publication_evidence)",
+        "ContentType": "application/json"
+      },
+      "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}],
+      "ResultPath": "$.publication_marker",
+      "Next": "PublishGate"
+    },
+    "PublishGate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName": "${settlement_publication_table}",
+        "Key": {
+          "business_date": {"S.$": "$.business_date"}
+        },
+        "UpdateExpression": "SET publication_status = :reconciled, reconciled_at = :now",
+        "ConditionExpression": "revision = :revision AND manifest_sha256 = :sha",
+        "ExpressionAttributeValues": {
+          ":reconciled": {"S": "RECONCILED"},
+          ":now": {"S.$": "$$.State.EnteredTime"},
+          ":revision": {"N.$": "States.Format('{}', $.revision)"},
+          ":sha": {"S.$": "$.sha256"}
+        }
+      },
+      "Catch": [
+        {"ErrorEquals": ["DynamoDB.ConditionalCheckFailedException"], "ResultPath": "$.superseded", "Next": "Superseded"},
+        {"ErrorEquals": ["States.ALL"], "ResultPath": "$.failure", "Next": "WorkflowFailed"}
+      ],
+      "End": true
+    },
+    "Superseded": {
+      "Type": "Succeed",
+      "Comment": "A newer settlement revision became authoritative before publication."
+    },
+    "WorkflowFailed": {
+      "Type": "Fail",
+      "Error": "LedgerFlowSettlementWorkflowFailed",
+      "Cause": "A gated settlement stage failed; no authoritative publication status was committed."
+    }
+  }
+}

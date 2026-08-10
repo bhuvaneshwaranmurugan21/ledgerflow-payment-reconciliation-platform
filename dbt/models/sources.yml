@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: ledgerflow_silver
+    schema: "{{ env_var('LEDGERFLOW_SOURCE_SCHEMA', 'ledgerflow_dev') }}"
+    loader: glue_iceberg_spectrum
+    tables:
+      - name: accepted_event
+        config:
+          freshness:
+            warn_after: {count: 15, period: minute}
+            error_after: {count: 60, period: minute}
+          loaded_at_field: received_at
+      - name: payment_state
+        config:
+          freshness:
+            warn_after: {count: 15, period: minute}
+            error_after: {count: 60, period: minute}
+          loaded_at_field: processed_at
+      - name: ledger_entry
+        config:
+          loaded_at_field: event_time
+      - name: business_exception
+        config:
+          loaded_at_field: processed_at
+      - name: settlement_exception
+        config:
+          loaded_at_field: business_date

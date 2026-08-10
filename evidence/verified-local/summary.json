@@ -1,0 +1,160 @@
+{
+  "classification": "MEASURED_LOCAL_RESULT",
+  "evidence_sha256": "66290203fcc9d2c94e6d3104f7cfacbaa946bc0f2c2ff2aebadc9d3aea5ce08f",
+  "failure_lab": {
+    "failed": 0,
+    "passed": 15,
+    "scenario_count": 15,
+    "scenarios": [
+      {
+        "evidence": "corrupt checksum rejected",
+        "name": "manifest_checksum_gate",
+        "status": "PASS"
+      },
+      {
+        "evidence": "every arrival classified",
+        "name": "raw_outcome_reconciliation",
+        "status": "PASS"
+      },
+      {
+        "evidence": "same event ID with altered money quarantined",
+        "name": "identity_payload_conflict",
+        "status": "PASS"
+      },
+      {
+        "evidence": "PAN-like field blocked before curated storage",
+        "name": "prohibited_card_field",
+        "status": "PASS"
+      },
+      {
+        "evidence": "every posting group sums to zero",
+        "name": "double_entry_balance",
+        "status": "PASS"
+      },
+      {
+        "evidence": "unbalanced fixture rejected",
+        "name": "unbalanced_rule_detector",
+        "status": "PASS"
+      },
+      {
+        "evidence": "ledger_delta=0",
+        "name": "exact_replay_no_second_effect",
+        "status": "PASS"
+      },
+      {
+        "evidence": "accepted and ledger state rolled back",
+        "name": "crash_before_commit",
+        "status": "PASS"
+      },
+      {
+        "evidence": "capture without authorization excluded from ledger",
+        "name": "lifecycle_violation",
+        "status": "PASS"
+      },
+      {
+        "evidence": "non-contiguous lifecycle excluded as one transaction",
+        "name": "transaction_version_gap",
+        "status": "PASS"
+      },
+      {
+        "evidence": "external totals equal internal expectation",
+        "name": "settlement_match",
+        "status": "PASS"
+      },
+      {
+        "evidence": "101 minor-unit difference blocks publication",
+        "name": "settlement_mismatch_gate",
+        "status": "PASS"
+      },
+      {
+        "evidence": "corrected evidence clears gate",
+        "name": "settlement_recovery",
+        "status": "PASS"
+      },
+      {
+        "evidence": "curated event payloads contain only HMAC tokens",
+        "name": "clear_email_exclusion",
+        "status": "PASS"
+      },
+      {
+        "evidence": "arrival shuffle reconstructed by transaction_version",
+        "name": "out_of_order_determinism",
+        "status": "PASS"
+      }
+    ]
+  },
+  "generated_at": "2026-08-10T11:49:59.512927+00:00",
+  "generation": {
+    "classification": "SYNTHETIC_FIXTURE",
+    "injected": {
+      "exact_duplicates": 83,
+      "identity_conflicts": 1,
+      "invalid_amount": 1,
+      "prohibited_fields": 1,
+      "unsupported_schema": 1
+    },
+    "raw_records": 50087,
+    "seed": 42,
+    "transactions": 21605,
+    "valid_unique_events": 50000
+  },
+  "implementation_sha256": "3789485e23efd8e1f505cd308af13e1738c0c9890b7f761708e425293f77f764",
+  "limitations": [
+    "Synthetic local evidence is not an AWS throughput or availability measurement.",
+    "Cloud deployment status remains unverified until a retained deployment report exists.",
+    "SQLite represents transaction boundaries; production storage uses the mapped AWS services."
+  ],
+  "machine": {
+    "logical_cpus": 9,
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+    "python": "3.12.13"
+  },
+  "manifest": {
+    "byte_size": 19585772,
+    "file_name": "payment_events.jsonl",
+    "raw_control_totals_minor": {
+      "EUR": 2858122328,
+      "GBP": 2859341051,
+      "INR": 2855986069,
+      "USD": 2859556943
+    },
+    "record_count": 50087,
+    "sha256": "b858be07c18f244ad78fe66dc0a74b9731c5cb4ec073a3c2c1810fd7b5df5862",
+    "version": 1
+  },
+  "measured_local": {
+    "accepted_event": 50000,
+    "accepted_new": 50000,
+    "business_exception": 0,
+    "classification": "MEASURED_LOCAL_RESULT",
+    "duplicates": 83,
+    "elapsed_seconds": 3.110903,
+    "ledger_balance_minor": 0,
+    "ledger_balanced": true,
+    "ledger_entry": 56790,
+    "outcomes": {
+      "ACCEPTED:contract_and_identity_passed": 50000,
+      "ARRIVAL:raw_record_read": 50087,
+      "DUPLICATE:exact_event_replay": 83,
+      "QUARANTINED:identity_payload_conflict": 1,
+      "QUARANTINED:invalid_amount_minor": 1,
+      "QUARANTINED:prohibited_fields:card_number": 1,
+      "QUARANTINED:unsupported_schema_version": 1
+    },
+    "payment_state": 21605,
+    "payment_state_sha256": "b54fe7d378e89f913573007fffeb96502f85e2f98fbca7d612c918f17ebe17d1",
+    "posted_event": 28395,
+    "quarantine": 4,
+    "quarantined": 4,
+    "raw_reconciled": true,
+    "raw_records": 50087,
+    "records_per_second": 16100.47,
+    "replay_ledger_delta": 0,
+    "replay_seconds": 2.159909,
+    "replay_state_unchanged": true,
+    "run_id": "initial-load",
+    "settlement_groups": 36,
+    "unbalanced_posting_groups": 0
+  },
+  "profile": "evidence"
+}

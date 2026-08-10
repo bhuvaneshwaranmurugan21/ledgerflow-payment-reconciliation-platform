@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ledgerflow/payment-event/1.0",
+  "title": "LedgerFlow payment lifecycle event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "event_id", "transaction_id", "transaction_version",
+    "source_id", "processor_id", "merchant_id", "event_type", "amount_minor",
+    "currency", "event_time", "received_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "event_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"},
+    "transaction_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"},
+    "transaction_version": {"type": "integer", "minimum": 1},
+    "source_id": {"type": "string"},
+    "processor_id": {"type": "string"},
+    "merchant_id": {"type": "string"},
+    "event_type": {"enum": ["authorization", "capture", "refund", "chargeback"]},
+    "amount_minor": {"type": "integer", "minimum": 1},
+    "currency": {"enum": ["INR", "USD", "EUR", "GBP"]},
+    "event_time": {"type": "string", "format": "date-time"},
+    "received_at": {"type": "string", "format": "date-time"},
+    "customer_email": {"type": "string", "format": "email"}
+  }
+}
+

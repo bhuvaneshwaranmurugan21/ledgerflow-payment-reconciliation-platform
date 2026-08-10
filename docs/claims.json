@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "statement": "The source registry expands to 20 unique logical sources.",
+      "classification": "MEASURED_LOCAL_RESULT",
+      "evidence": ["config/sources.json", "tests/test_contracts.py"]
+    },
+    {
+      "statement": "Exact replay produces no second ledger effect in the local evidence implementation.",
+      "classification": "MEASURED_LOCAL_RESULT",
+      "evidence": ["evidence/verified-local/summary.json", "tests/test_store.py"]
+    },
+    {
+      "statement": "The controlled local failure laboratory passes all retained scenarios.",
+      "classification": "MEASURED_LOCAL_RESULT",
+      "evidence": ["evidence/verified-local/summary.json", "evidence/verified-local/report.html"]
+    },
+    {
+      "statement": "Card-security fields are rejected recursively before Lambda raw persistence.",
+      "classification": "VERIFIED_IMPLEMENTATION_PROPERTY",
+      "evidence": ["lambdas/schema_identity_gate/handler.py", "tests/test_lambda_protocols.py"]
+    },
+    {
+      "statement": "Settlement processing uses a server-side copy of the exact S3 object version that passed checksum validation.",
+      "classification": "VERIFIED_IMPLEMENTATION_PROPERTY",
+      "evidence": ["lambdas/manifest_loader/handler.py", "tests/test_lambda_protocols.py"]
+    },
+    {
+      "statement": "Only the currently active settlement revision and manifest hash can open a finance publication gate.",
+      "classification": "VERIFIED_IMPLEMENTATION_PROPERTY",
+      "evidence": ["orchestration/stepfunctions/settlement_workflow.asl.json", "tests/test_repository_contract.py"]
+    },
+    {
+      "statement": "Finance current-state views exclude every transaction carrying a business exception.",
+      "classification": "VERIFIED_IMPLEMENTATION_PROPERTY",
+      "evidence": ["dbt/models/marts/dim_payment_current.sql", "dbt/tests/no_invalid_payment_in_current_finance.sql"]
+    },
+    {
+      "statement": "The AWS reference architecture is sized for a modeled 10 million arrivals per day.",
+      "classification": "MODELED_PRODUCTION_CAPACITY",
+      "evidence": ["docs/capacity.md"]
+    },
+    {
+      "statement": "The repository does not claim an executed AWS deployment or cloud benchmark.",
+      "classification": "EVIDENCE_BOUNDARY",
+      "evidence": ["docs/deployment-status.md"]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<title>LedgerFlow verified evidence</title><style>
+body{font-family:Arial,sans-serif;background:#05080d;color:#e5e7eb;margin:0;padding:32px}
+h1{color:#f8fafc}.note{color:#94a3b8}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.card{background:#15191f;border:1px solid #4b5563;padding:18px}.value{font-size:28px;font-weight:700}
+table{width:100%;border-collapse:collapse;margin-top:24px}th,td{padding:10px;border-bottom:1px solid #374151;text-align:left}
+</style></head><body><h1>LedgerFlow verified local evidence</h1>
+<p class='note'>Synthetic data • measured on Linux-6.18.35-x86_64-with-glibc2.39 • not cloud-scale proof</p>
+<div class='grid'><div class='card'><div>Raw arrivals</div><div class='value'>50,087</div></div>
+<div class='card'><div>Accepted events</div><div class='value'>50,000</div></div>
+<div class='card'><div>Ledger entries</div><div class='value'>56,790</div></div>
+<div class='card'><div>Replay ledger delta</div><div class='value'>0</div></div>
+<div class='card'><div>Ledger balance</div><div class='value'>0</div></div>
+<div class='card'><div>Failure checks</div><div class='value'>15/15</div></div></div>
+<table><thead><tr><th>Scenario</th><th>Status</th><th>Evidence</th></tr></thead><tbody><tr><td>manifest_checksum_gate</td><td>PASS</td><td>corrupt checksum rejected</td></tr><tr><td>raw_outcome_reconciliation</td><td>PASS</td><td>every arrival classified</td></tr><tr><td>identity_payload_conflict</td><td>PASS</td><td>same event ID with altered money quarantined</td></tr><tr><td>prohibited_card_field</td><td>PASS</td><td>PAN-like field blocked before curated storage</td></tr><tr><td>double_entry_balance</td><td>PASS</td><td>every posting group sums to zero</td></tr><tr><td>unbalanced_rule_detector</td><td>PASS</td><td>unbalanced fixture rejected</td></tr><tr><td>exact_replay_no_second_effect</td><td>PASS</td><td>ledger_delta=0</td></tr><tr><td>crash_before_commit</td><td>PASS</td><td>accepted and ledger state rolled back</td></tr><tr><td>lifecycle_violation</td><td>PASS</td><td>capture without authorization excluded from ledger</td></tr><tr><td>transaction_version_gap</td><td>PASS</td><td>non-contiguous lifecycle excluded as one transaction</td></tr><tr><td>settlement_match</td><td>PASS</td><td>external totals equal internal expectation</td></tr><tr><td>settlement_mismatch_gate</td><td>PASS</td><td>101 minor-unit difference blocks publication</td></tr><tr><td>settlement_recovery</td><td>PASS</td><td>corrected evidence clears gate</td></tr><tr><td>clear_email_exclusion</td><td>PASS</td><td>curated event payloads contain only HMAC tokens</td></tr><tr><td>out_of_order_determinism</td><td>PASS</td><td>arrival shuffle reconstructed by transaction_version</td></tr></tbody></table>
+<p class='note'>Claims are classified in docs/claims.json. Production targets remain modeled requirements until a cloud deployment report exists.</p>
+</body></html>

@@ -1,0 +1,10 @@
+{
+  "families": [
+    {"family": "checkout", "instances": 5, "mode": "stream", "contract": "payment_event", "owner": "payments", "freshness_minutes": 5},
+    {"family": "gateway", "instances": 4, "mode": "stream", "contract": "payment_event", "owner": "payments", "freshness_minutes": 5},
+    {"family": "legacy_db", "instances": 3, "mode": "cdc", "contract": "payment_event", "owner": "payments", "freshness_minutes": 15},
+    {"family": "wallet", "instances": 3, "mode": "stream", "contract": "payment_event", "owner": "wallets", "freshness_minutes": 10},
+    {"family": "processor_settlement", "instances": 3, "mode": "manifest_file", "contract": "settlement_evidence", "owner": "finance", "freshness_minutes": 1440},
+    {"family": "chargeback", "instances": 2, "mode": "stream", "contract": "payment_event", "owner": "risk", "freshness_minutes": 30}
+  ]
+}
